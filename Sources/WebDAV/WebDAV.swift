@@ -89,19 +89,13 @@ public extension WebDAV {
         
         let body =
 """
-<?xml version="1.0"?>
-<d:propfind  xmlns:d="DAV:" xmlns:oc="http://owncloud.org/ns" xmlns:nc="http://nextcloud.org/ns">
-  <d:prop>
-        <d:getlastmodified />
-        <d:getetag />
-        <d:getcontenttype />
-        <oc:fileid />
-        <oc:permissions />
-        <oc:size />
-        <nc:has-preview />
-        <oc:favorite />
-  </d:prop>
-</d:propfind>
+<?xml version="1.0" encoding="utf-8" ?>
+<D:propfind xmlns:D="DAV:">
+  <D:prop>
+    <D:displayname/>
+    <D:resourcetype/>
+  </D:prop>
+</D:propfind>
 """
         request.httpBody = body.data(using: .utf8)
         
