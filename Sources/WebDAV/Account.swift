@@ -19,26 +19,26 @@ public protocol WebDAVAccount: Hashable {
 internal struct UnwrappedAccount: Hashable {
     var username: String
     var baseURL: URL
+
+init?<Account: WebDAVAccount>(account: Account) {
+    guard let username = account.username,
+          let baseURLString = account.baseURL,
+          var baseURL = URL(string: baseURLString) else { return nil }
     
-    init?<Account: WebDAVAccount>(account: Account) {
-        guard let username = account.username,
-              let baseURLString = account.baseURL,
-              var baseURL = URL(string: baseURLString) else { return nil }
-        
-        switch baseURL.scheme {
-        case nil:
-            baseURL = URL(string: "https://" + baseURLString) ?? baseURL
-        case "https":
-            break
-        default:
-            var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: false)
-            components?.scheme = "https"
-            baseURL = components?.url ?? baseURL
-        }
-        
-        self.username = username
-        self.baseURL = baseURL
+    switch baseURL.scheme {
+    case nil:
+        baseURL = URL(string: "http://" + baseURLString) ?? baseURL // 默认使用 http
+    case "http", "https":
+        break // 允许 http 和 https
+    default:
+        var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: false)
+        components?.scheme = "http" // 其他协议默认改为 http
+        baseURL = components?.url ?? baseURL
     }
+    
+    self.username = username
+    self.baseURL = baseURL
+}
     
     /// Description of the unwrapped account in the format "username@baseURL".
     var description: String {
