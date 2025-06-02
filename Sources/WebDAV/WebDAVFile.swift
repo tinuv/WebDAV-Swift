@@ -33,12 +33,18 @@ public struct WebDAVFile: Identifiable, Codable, Equatable, Hashable {
         let properties = xml["propstat"][0]["prop"]
         guard var path = xml["href"].element?.text,
               let dateString = properties["getlastmodified"].element?.text,
-              let date = WebDAVFile.rfc1123Formatter.date(from: dateString),
-              let id = properties["fileid"].element?.text,
-              let sizeString = properties["size"].element?.text,
-              let size = Int(sizeString),
-              let etag = properties["getetag"].element?.text else { return nil }
-        let isDirectory = properties["getcontenttype"].element?.text == nil
+              let date = WebDAVFile.rfc1123Formatter.date(from: dateString) else { return nil }
+        
+            // 通过 resourcetype 判断是否为目录
+        let isDirectory = properties["resourcetype"]["collection"].element != nil
+        
+            // 目录可能没有 getcontentlength，默认为 0
+        let sizeString = properties["getcontentlength"].element?.text
+        let size = isDirectory ? 0 : (Int(sizeString ?? "") ?? 0)
+        
+            // fileid 和 etag 可选
+        let id = properties["fileid"].element?.text
+        let etag = properties["getetag"].element?.text
         
         if let decodedPath = path.removingPercentEncoding {
             path = decodedPath
@@ -52,7 +58,7 @@ public struct WebDAVFile: Identifiable, Codable, Equatable, Hashable {
             path.removeFirst()
         }
         
-        self.init(path: path, id: id, isDirectory: isDirectory, lastModified: date, size: size, etag: etag)
+        self.init(path: path, id: id ?? "", isDirectory: isDirectory, lastModified: date, size: size, etag: etag ?? "")
     }
     
     //MARK: Static
