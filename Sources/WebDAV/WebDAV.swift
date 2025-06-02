@@ -87,16 +87,18 @@ public extension WebDAV {
             return nil
         }
         
-        let body =
-"""
-<?xml version="1.0" encoding="utf-8" ?>
-<D:propfind xmlns:D="DAV:">
-  <D:prop>
-    <D:displayname/>
-    <D:resourcetype/>
-  </D:prop>
-</D:propfind>
-"""
+        let body = """
+            <?xml version="1.0" encoding="utf-8"?>
+            <D:propfind xmlns:D="DAV:">
+                <D:prop>
+                    <D:displayname/>
+                    <D:getcontentlength/>
+                    <D:getlastmodified/>
+                    <D:resourcetype/>
+                    <D:getcontenttype/>
+                </D:prop>
+            </D:propfind>
+        """
         request.httpBody = body.data(using: .utf8)
         
         let task = URLSession(configuration: .ephemeral, delegate: self, delegateQueue: nil).dataTask(with: request) { [weak self] data, response, error in
